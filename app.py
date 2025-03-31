@@ -20,7 +20,7 @@ df['Week'] = df['Date'].dt.strftime('%Y-%U')  # Année-Semaine
 app.layout = dbc.Container([
     dbc.Row([
         html.H1("Tableau de Bord des Ventes du Supermarché", 
-                     style={'fontSize': '30px','fontWeight': 'bold','color': 'black', 'textAlign': 'center'}),
+                     style={'fontSize': '30px','fontWeight': 'bold','color': 'white', 'textAlign': 'center'}),
     ], style={'display': 'flex', 'alignItems': 'center','justifyContent': 'center', 'width': '100%', 'marginBottom': '20px'}),
     
     dbc.Row([
@@ -161,13 +161,18 @@ def update_dashboard(selected_city, selected_gender):
     
     # Évolution des ventes par semaine
     sales_by_week = filtered_df.groupby('Week')['Total'].sum().reset_index()
-    line_fig = px.line(sales_by_week, x='Week', y='Total', 
+    sales_by_week['Week_Label'] = ['S' + str(i + 1) for i in range(len(sales_by_week))] # Labels des semaines
+    line_fig = px.line(sales_by_week, x='Week_Label', y='Total', 
                        title='Evolution du montant total des achats par semaine',
                        color_discrete_sequence=[line_color])
+    line_fig.update_traces(
+        hovertemplate='<b>Semaine:</b> %{customdata[0]}<br><b>Total des ventes:</b> %{y:,.2f} $<extra></extra>',
+        customdata=sales_by_week[['Week']] # Ajout de la colonne 'Week' pour le survol
+    )
     line_fig.update_layout(
         plot_bgcolor="#f7f7f7",  # Couleur de fond de l'aire de tracé
         paper_bgcolor="#eaeaea",  # Couleur de fond de tout le graphique
-        xaxis=dict(tickcolor="black"),
+        xaxis=dict(tickcolor="black", tickangle=0),  # Orientation verticale de la légende x
         yaxis=dict(tickcolor="black"),
         font=dict(color="#333333")
     )
